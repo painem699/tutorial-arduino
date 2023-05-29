@@ -1,0 +1,357 @@
+#include <LiquidCrystal_I2C.h>
+#include <Keypad.h>
+#include <TM1637Display.h>
+#include <Servo.h>
+#define CLK 7
+#define DIO 6
+#define RED 53
+#define YELLOW 51
+#define GREEN 49
+#define BUZZER 47
+
+
+int potpin = 0;  // analog pin used to connect the potentiometer
+int val,out;    // variable to read the value from the analog pin
+
+
+TM1637Display display(CLK, DIO);
+Servo myservo;
+
+
+LiquidCrystal_I2C lcd(0x27, 20, 4);
+
+const byte ROWS = 4; //4 baris
+const byte COLS = 4; //4 kolom
+char keys[ROWS][COLS] = {
+  {'1','2','3','A'},
+  {'4','5','6','B'},
+  {'7','8','9','C'},
+  {'*','0','#','D'}
+};
+
+byte colPins[COLS] = {31, 33, 35, 37}; // pin 2,3,4,5 untuk pin kolom keypad (lihat gambar)
+byte rowPins[ROWS] = {23, 25, 27, 29}; // pin 6,7,8,9 untuk pin baris keypad (lihat gambar)
+Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+
+int kondisi=0,a=0,b=0,c=0,d=0,total=0,e;
+
+String inpass,password="9876";
+
+
+void setup() {
+  // put your setup code here, to run once:
+  lcd.begin(20, 4);
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(6, 1);
+  lcd.print("WELCOME");
+  //delay (2000);
+  for (int f=0;f<3;f++)
+  {
+  digitalWrite(53,HIGH);
+  digitalWrite(51,HIGH);
+  digitalWrite(49,HIGH);
+  delay(1000);
+  digitalWrite(53,LOW);
+  digitalWrite(51,LOW);
+  digitalWrite(49,LOW);
+  delay(1000);
+  }
+  lcd.clear();
+
+  myservo.attach(5);
+
+  //SEVENSEGMENT TM1637
+  display.showNumberDec(0, true);
+  total = 0000;
+  display.setBrightness(4);
+
+  pinMode(53,OUTPUT);
+  pinMode(51,OUTPUT);
+  pinMode(49,OUTPUT);
+  pinMode(47,OUTPUT);
+
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+   while (kondisi == 0)
+  {
+    char key = keypad.getKey();
+    lcd.setCursor (0,0);
+    lcd.print("INPUT PASSWORD :");
+    if (key)
+    {
+      if (key != 'A' && key != 'B' && key != 'C' && key != 'D' && key != '*' && key != '#')
+      {
+        if (key == '0')
+        {
+          a = b;
+          b = c;
+          c = d;
+          d = 0;
+          total = (a*1000) + (b*100) + (c*10) + d;
+        }
+        else if (key == '1')
+        {
+          a = b;
+          b = c;
+          c = d;
+          d = 1;
+          total = (a*1000) + (b*100) + (c*10) + d;
+        }
+        else if (key == '2')
+        {
+          a = b;
+          b = c;
+          c = d;
+          d = 2;
+          total = (a*1000) + (b*100) + (c*10) + d;
+        }
+        else if (key == '3')
+        {
+          a = b;
+          b = c;
+          c = d;
+          d = 3;
+          total = (a*1000) + (b*100) + (c*10) + d;
+        }
+        else if (key == '4')
+        {
+          a = b;
+          b = c;
+          c = d;
+          d = 4;
+          total = (a*1000) + (b*100) + (c*10) + d;
+        }
+        else if (key == '5')
+        {
+          a = b;
+          b = c;
+          c = d;
+          d = 5;
+          total = (a*1000) + (b*100) + (c*10) + d;
+        }
+        else if (key == '6')
+        {
+          a = b;
+          b = c;
+          c = d;
+          d = 6;
+          total = (a*1000) + (b*100) + (c*10) + d;
+        }
+        else if (key == '7')
+        {
+          a = b;
+          b = c;
+          c = d;
+          d = 7;
+          total = (a*1000) + (b*100) + (c*10) + d;
+        }
+        else if (key == '8')
+        {
+          a = b;
+          b = c;
+          c = d;
+          d = 8;
+          total = (a*1000) + (b*100) + (c*10) + d;
+        }
+        else if (key == '9')
+        {
+          a = b;
+          b = c;
+          c = d;
+          d = 9;
+          total = (a*1000) + (b*100) + (c*10) + d;
+        }
+
+        inpass += key;
+        /*e++;
+        if (e>4)
+        {
+          total=0;
+          inpass="";
+        }*/
+      }
+      else if (key == 'C')
+      {
+        a = b = c = d = total = 0;
+        inpass = "";
+      }
+      else if (key == '#')
+      {
+        
+        kondisi = 1;
+        lcd.clear();
+      }
+    }
+    display.showNumberDec(total, true);
+  }
+
+  while(kondisi ==1 )
+  {
+    if (inpass== password)
+    {
+    lcd.setCursor (0,0);
+    lcd.print("PASSWORD BENAR");
+    a = b = c = d = total = 0;
+    inpass = "";
+    display.showNumberDec(total, true);
+    delay (1000);
+    kondisi=2;
+    lcd.clear();
+    }
+    else
+    {
+    lcd.setCursor (0,0);
+    lcd.print("PASSWORD SALAH !!!");
+    a = b = c = d = total = 0;
+    inpass = "";
+    delay (1000);
+    kondisi=-0;
+    lcd.clear();
+    }
+  }
+
+  while (kondisi==2)
+  {
+    char key = keypad.getKey();
+
+        lcd.setCursor (0,0);
+    lcd.print("MENU PILIHAN :");
+        lcd.setCursor (0,1);
+    lcd.print("1. SERVO");
+        lcd.setCursor (10,1);
+    lcd.print("4. C UP");
+        lcd.setCursor (0,2);
+    lcd.print("2. POT");
+        lcd.setCursor (10,2);
+    lcd.print("5. C DOWN");
+        lcd.setCursor (0,3);
+    lcd.print("3. OLED");
+        lcd.setCursor (10,3);
+    lcd.print("6. BUZZER");
+
+    if (key=='1')
+    {
+      lcd.clear();
+      kondisi=3;
+    }
+    else if (key=='2')
+    {
+      lcd.clear();
+      kondisi=4;
+    }
+    else if (key=='3')
+    {
+      lcd.clear();
+      kondisi=5;
+    }
+    else if (key=='4')
+    {
+      lcd.clear();
+      kondisi=6;
+    }
+    else if (key=='5')
+    {
+      lcd.clear();
+      kondisi=7;
+    }
+    else if (key=='6')
+    {
+      lcd.clear();
+      kondisi=8;
+    }
+
+  }
+
+  while (kondisi==3)
+    {
+      char key = keypad.getKey();
+
+       lcd.setCursor (0,0);
+       lcd.print("Servo Jalan");
+       myservo.write(0);
+       //delay(1000);
+       for (int g=0;g<1000;g++)
+       {
+         delay(1);
+         if (key=='*')
+         {
+           lcd.clear();
+           kondisi=2;
+         }
+       }
+       myservo.write(90);
+       //delay(1000);
+       for (int h=0;h<1000;h++)
+       {
+         delay(1);
+         if (key=='*')
+         {
+           lcd.clear();
+           kondisi=2;
+         }
+       }
+       myservo.write(180);
+       //delay(1000);
+      for (int i=0;i<1000;i++)
+       {
+         delay(1);
+         if (key=='*')
+         {
+           lcd.clear();
+           kondisi=2;
+         }
+       }
+       
+    }
+  while (kondisi==4)
+  {
+    char key = keypad.getKey();
+
+   val = analogRead(potpin);            // reads the value of the potentiometer (value between 0 and 1023)
+   out = map(val, 0, 1023, 0, 100);     // scale it to use it with the servo (value between 0 and 180)
+   lcd.setCursor (0,0);
+   lcd.print("POTENSIO");
+   lcd.setCursor (0,2);
+   lcd.print("ANALOG:");
+   lcd.setCursor (7,2);
+   lcd.print(val);
+   lcd.setCursor (0,3);
+   lcd.print("PERSEN:");
+   lcd.setCursor (7,3);
+   lcd.print(out);
+   if (key=='*')
+    {
+      lcd.clear();
+      kondisi=2;
+    }
+  }
+  while (kondisi==5)
+  {
+
+  }
+  while (kondisi==6)
+  {
+
+  }
+  while (kondisi==7)
+  {
+
+  }
+  while (kondisi==8)
+  {
+    char key = keypad.getKey();
+
+   lcd.setCursor (0,0);
+   lcd.print("BUZZER AKTIF");
+    digitalWrite(47, HIGH);
+    if (key=='*')
+    {
+      lcd.clear();
+      kondisi=2;
+    }
+  }
+
+}
